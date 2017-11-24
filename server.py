@@ -17,32 +17,36 @@ class EchoHandler(socketserver.DatagramRequestHandler):
 
     def handle(self):
 
+# Decodifica lo que nos manda el cliente
+
         for line in self.rfile:
             if line.decode('utf-8') != '\r\n' or '' or not line:
                 linea = line.decode('utf-8')
                 print(linea)
-                metodo = linea[:linea.find(' ')]
-                partuser = linea[linea.rfind(':')+1:]
-                user = partuser[:partuser.rfind('@')]
-                partip = linea[linea.rfind('@')+1:]
-                ip = partip[:partip.rfind(' ')]
-                okline = (metodo + ' sip:' + user + '@' + ip + ' SIP/2.0\r\n')
 
-                if linea == okline:
-                    if metodo == 'INVITE' and ip == (sys.argv[1]):
+                MET = linea[:linea.find(' ')]
+                partuser = linea[linea.rfind(':')+1:]
+                USER = partuser[:partuser.rfind('@')]
+                partip = linea[linea.rfind('@')+1:]
+                IP = partip[:partip.rfind(' ')]
+                ok = (MET.upper() + ' sip:' + USER + '@' + IP + ' SIP/2.0\r\n')
+
+                if linea == ok:
+                    if MET == 'INVITE' and IP == (sys.argv[1]):
                         self.wfile.write(b"SIP/2.0 100 Trying\r\n\r\n")
                         self.wfile.write(b"SIP/2.0 180 Ringing\r\n\r\n")
                         self.wfile.write(b"SIP/2.0 200 OK\r\n\r\n")
-                    elif metodo == 'BYE' and ip == (sys.argv[1]):
+                    elif MET == 'BYE' and IP == (sys.argv[1]):
                         self.wfile.write(b"SIP/2.0 200 OK\r\n\r\n")
-                    elif metodo == 'ACK' and ip == (sys.argv[1]):
-                        continue
-                        #listclient = list(self.client_address
+                    elif MET == 'ACK' and IP == (sys.argv[1]):
+                        m = ('mp32rtp -i 127.0.0.1 -p 23032 < ')
+                        m += str(sys.argv[3])
+                        os.system(m)
                     else:
-                        self.wfile.write(b"SIP/2.0 405 Method Not Allowed\r\n\r\n")
+                        l = ('SIP/2.0 405 Method Not Allowed\r\n\r\n')
+                        self.wfile.write(bytes(l, 'utf-8'))
                 else:
-                    self.wfile.write(b"SIP/2.0 Bad Request\r\n\r\n")
-
+                    self.wfile.write(b"SIP/2.0 400 Bad Request\r\n\r\n")
 
 if __name__ == "__main__":
 
