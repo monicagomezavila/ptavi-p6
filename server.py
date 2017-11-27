@@ -17,8 +17,6 @@ class EchoHandler(socketserver.DatagramRequestHandler):
 
     def handle(self):
 
-# Decodifica lo que nos manda el cliente
-
         for line in self.rfile:
             if line.decode('utf-8') != '\r\n' or '' or not line:
                 linea = line.decode('utf-8')
